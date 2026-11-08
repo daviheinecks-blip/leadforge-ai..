@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LeadForge AI</title>
+<style>
+:root{--bg:#08080D;--b2:#101019;--p:#7C3AED;--v:#A855F7;--pl:#C4B5FD;--t:#fff;--g:#9292A5;--ln:#262636;--ok:#22c55e;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(900px 380px at 85% -8%,#7C3AED30,transparent),var(--bg);color:var(--t);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1{font-size:26px;margin:0 0 16px}h3{margin:0 0 10px;font-size:16px}.m{color:var(--g)}
+.top{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--ln);background:var(--b2)}
+.logo{font-weight:800;font-size:18px;background:linear-gradient(90deg,var(--pl),var(--v));-webkit-background-clip:text;background-clip:text;color:transparent}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 14px;border-bottom:1px solid var(--ln)}
+nav a{white-space:nowrap;padding:8px 14px;border-radius:10px;color:var(--g);text-decoration:none;font-weight:600}
+nav a.on{background:#7C3AED26;color:var(--t);box-shadow:inset 0 -2px var(--v)}
+main{max-width:900px;margin:0 auto;padding:18px 14px 40px}
+.card{background:var(--b2);border:1px solid var(--ln);border-radius:14px;padding:16px;box-shadow:0 6px 20px #0006;margin-bottom:12px}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:12px}.kp .card{margin:0}.kp small{color:var(--g);font-weight:600;letter-spacing:.04em}.kp b{display:block;font-size:30px;color:var(--pl)}
+button,.btn{background:linear-gradient(135deg,var(--p),var(--v));color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
+button.s{background:transparent;border:1px solid var(--ln)}button.d{background:#b91c1c}button.ok{background:var(--ok);color:#052e12}button.no{background:#b91c1c}button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select,textarea{width:100%;background:var(--bg);color:var(--t);border:1px solid var(--ln);border-radius:10px;padding:10px;font:inherit}
+textarea{min-height:90px;resize:vertical}label{display:block;font-size:13px;color:var(--g);margin-bottom:12px}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 12px}
+.tag{display:inline-block;padding:2px 10px;border-radius:99px;background:#7C3AED2e;color:var(--pl);font-size:12px;font-weight:600}.tag.v{background:#22c55e26;color:#86efac}.tag.n{background:#b91c1c33;color:#fca5a5}
+.err{color:#fca5a5;min-height:20px;margin:0 0 8px}
+.ov{position:fixed;inset:0;background:#000b;display:grid;place-items:center;z-index:20;padding:14px}.mb{background:var(--b2);border:1px solid var(--ln);border-radius:16px;padding:18px;width:min(560px,100%);max-height:90vh;overflow:auto}
+.au{position:fixed;inset:0;background:var(--bg);z-index:40;display:grid;place-items:center;padding:14px;overflow:auto}.au .card{width:min(420px,100%)}.tabs{display:flex;gap:6px;margin-bottom:12px}
+#ts{position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);background:var(--p);padding:10px 16px;border-radius:12px;opacity:0;transition:.25s;z-index:50;pointer-events:none;text-align:center}#ts.on{opacity:1;transform:translate(-50%,0)}
+svg{width:100%;height:auto;display:block}
+</style>
+</head>
+<body>
+<div class="top"><span class="logo">LeadForge AI</span><button class="s" data-a="out">Sair</button></div>
+<nav id="nav"></nav>
+<main id="main"></main>
+<div id="md"></div><div id="ts"></div><div id="au"></div>
+<script>
+function blank(){return {projects:[],user:{name:'',email:''}}}
+var S=blank(),KEY='',AM='in',G={id:null},A={},V={};
+function loadS(k){KEY=k;S=blank();try{var r=localStorage.getItem(k);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}}
+function save(){if(!KEY)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Não foi possível salvar neste navegador.')}}
+var UF=['Acre','Alagoas','Amapá','Amazonas','Bahia','Ceará','Distrito Federal','Espírito Santo','Goiás','Maranhão','Mato Grosso','Mato Grosso do Sul','Minas Gerais','Pará','Paraíba','Paraná','Pernambuco','Piauí','Rio de Janeiro','Rio Grande do Norte','Rio Grande do Sul','Rondônia','Roraima','Santa Catarina','São Paulo','Sergipe','Tocantins'];
+var NI=['Restaurantes','Lanchonetes','Hamburguerias','Pizzarias','Barbearias','Salões de beleza','Academias','Clínicas','Pet shops','Lojas','Oficinas','Mercados','Padarias','Prestadores de serviços'];
+var REF='https://ygarapaba-sabor-da-terra.lovable.app';
+var $=function(q){return document.querySelector(q)};
+var E=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+var uid=function(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5)};
+var digits=function(s){return String(s||'').replace(/\D/g,'')};
+var brl=function(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})};
+function num(s){s=String(s).replace(/[^\d,.]/g,'');if(s.indexOf(',')>-1)s=s.replace(/\./g,'').replace(',','.');var n=parseFloat(s);return isNaN(n)?-1:n}
+function opts(a,ph){return '<option value="">'+ph+'</option>'+a.map(function(x){return '<option>'+E(x)+'</option>'}).join('')}
+var tm=null;function toast(m){var t=$('#ts');t.textContent=m;t.className='on';clearTimeout(tm);tm=setTimeout(function(){t.className=''},2800)}
+function modal(h){$('#md').innerHTML='<div class="ov"><div class="mb">'+h+'</div></div>'}
+function closeM(){$('#md').innerHTML=''}
+var pend=null;function cfm(m,f){pend=f;modal('<p>'+m+'</p><div class="row"><button class="d" data-a="yes">Confirmar</button><button class="s" data-a="close">Cancelar</button></div>')}
+function openUrl(u,label){var w=null;try{w=window.open(u,'_blank')}catch(e){}if(w){try{w.opener=null}catch(e){}return}modal('<p>O navegador bloqueou a abertura automática.</p><p><a class="btn" target="_blank" rel="noopener" href="'+E(u)+'">'+label+'</a></p><button class="s" data-a="close">Fechar</button>')}
+function copyText(t){var ok=false,x=document.createElement('textarea');x.value=t;x.style.cssText='position:fixed;opacity:0';document.body.appendChild(x);x.select();try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(x);try{navigator.clipboard.writeText(t).catch(function(){});ok=true}catch(e){}
+if(ok)toast('Prompt copiado! Cole no Claude ou no Lovable.');else modal('<p>Não foi possível copiar automaticamente. Selecione o texto e copie.</p><textarea style="min-height:200px" readonly onfocus="this.select()">'+E(t)+'</textarea><button class="s" data-a="close">Fechar</button>')}
+
+/* ---------- prompt do site ---------- */
+function mkPrompt(o){var L=['Crie um site de uma página (landing page) responsivo e profissional para a empresa abaixo, seguindo o mesmo estilo, a mesma estrutura e o mesmo nível de acabamento deste site de referência: '+REF,'','Dados da empresa:','- Nome: '+o.name,'- WhatsApp: '+o.phone+' (todos os botões de contato devem abrir https://wa.me/55'+digits(o.phone).replace(/^55/,'')+' com uma mensagem inicial adequada)'];
+if(o.desc)L.push('- Descrição: '+o.desc);
+if(o.files.length)L.push('- Arquivos que vou anexar: '+o.files.join(', '));
+if(o.photos.length)L.push('- Fotos da empresa que vou anexar (use-as no site): '+o.photos.join(', '));
+L.push('','Estrutura, como no site de referência:','- Menu fixo no topo com o nome da empresa, links de âncora e botão principal de WhatsApp.','- Seção inicial com foto grande, título curto e marcante com uma palavra em destaque, subtítulo e dois botões (WhatsApp e rolagem para os serviços).','- Seção “Nossa história” com texto curto e números de destaque, somente se eu fornecer dados reais.','- Seção de serviços ou produtos em cards com foto, título, descrição curta e botão de WhatsApp que já envia o nome do item.','- Seção “Como pedir” ou “Como contratar” com 3 passos numerados.','- Seção de visita ou contato com endereço (se informado), WhatsApp, horários e botões “Abrir no mapa” e “Ligar agora”.','- Chamada final com botão de WhatsApp, rodapé e botão flutuante de WhatsApp.','','Regras:','- Use somente os dados que informei. Não invente endereço, horários, preços, depoimentos, números ou fotos; se faltar um dado, oculte a seção ou deixe um campo para eu preencher.','- Adapte textos, seções e cores ao tipo de negócio descrito, mantendo o visual limpo e elegante do site de referência.','- Textos em português do Brasil, tom acolhedor e comercial.','- Mobile-first, carregamento rápido, SEO básico (title, meta description e Open Graph).','- Ao final, explique em poucos passos como publicar o site.');return L.join('\n')}
+
+/* ---------- views ---------- */
+V.dashboard=function(){var P=S.projects,sold=P.filter(function(p){return p.status=='Vendido'}),tot=sold.reduce(function(a,p){return a+p.soldValue},0);
+return '<h1>OLÁ, '+E((S.user.name||'').toUpperCase())+'</h1><div class="kp"><div class="card"><small>SITES CRIADOS</small><b>'+P.length+'</b></div><div class="card"><small>VALOR VENDIDO</small><b>'+brl(tot)+'</b></div><div class="card"><small>QUANTIDADE VENDIDA</small><b>'+sold.length+'</b></div></div><div class="card"><h3>Vendas (valor acumulado)</h3>'+chart(sold)+'</div><div class="row"><a class="btn" href="#prospecting">Prospectar empresas</a><a class="btn s" href="#sites">CRIAR SITES</a></div>'};
+function chart(s){if(!s.length)return '<p class="m">O gráfico aparece quando você registrar a primeira venda com o botão VENDI, em Projetos.</p>';
+s=s.slice().sort(function(a,b){return a.soldAt-b.soldAt});var pts=[{t:s[0].soldAt-864e5,v:0}],c=0;s.forEach(function(p){c+=p.soldValue;pts.push({t:p.soldAt,v:c})});
+var W=600,H=240,pl=10,pr=10,pt=14,pb=30,t0=pts[0].t,t1=pts[pts.length-1].t,mx=c||1,X=function(t){return pl+(t-t0)/(t1-t0)*(W-pl-pr)},Y=function(v){return H-pb-v/mx*(H-pb-pt)};
+var d=pts.map(function(p,i){return (i?'L':'M')+X(p.t).toFixed(1)+' '+Y(p.v).toFixed(1)}).join(' ');
+var g=[0,.5,1].map(function(f){var y=Y(mx*f);return '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y+'" y2="'+y+'" stroke="#262636"/><text x="'+(W-pr)+'" y="'+(y-4)+'" fill="#9292A5" font-size="11" text-anchor="end">'+brl(mx*f)+'</text>'}).join('');
+var dt=function(t){return new Date(t).toLocaleDateString('pt-BR')};
+return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Gráfico de vendas acumuladas"><defs><linearGradient id="gr" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#22c55e" stop-opacity=".35"/><stop offset="1" stop-color="#22c55e" stop-opacity="0"/></linearGradient></defs>'+g+'<path d="'+d+' L'+X(t1)+' '+(H-pb)+' L'+X(t0)+' '+(H-pb)+' Z" fill="url(#gr)"/><path d="'+d+'" fill="none" stroke="#22c55e" stroke-width="3" stroke-linejoin="round"/>'+pts.slice(1).map(function(p){return '<circle cx="'+X(p.t).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="4" fill="#22c55e"/>'}).join('')+'<text x="'+pl+'" y="'+(H-8)+'" fill="#9292A5" font-size="11">'+dt(pts[1].t)+'</text><text x="'+(W-pr)+'" y="'+(H-8)+'" fill="#9292A5" font-size="11" text-anchor="end">'+dt(t1)+'</text></svg>'}
+V.prospecting=function(){return '<h1>Prospectar empresas</h1><div class="card"><div class="fg"><label>Estado *<select id="pu">'+opts(UF,'Selecione o estado')+'</select></label><label>Nicho *<select id="pn">'+opts(NI,'Selecione o nicho')+'</select></label><label>Cidade (opcional)<input id="pc" placeholder="Ex.: Recife"></label></div><p class="err" id="pe"></p><button data-a="pm">BUSCAR EMPRESAS</button><p class="m">Abre o Google Maps em outra aba com todas as empresas do nicho na região escolhida. Depois, vá em CRIAR SITES para cadastrar a empresa que você quer atender.</p></div>'};
+V.sites=function(){G={id:null};return '<h1>CRIAR SITES</h1><div class="card"><div class="fg"><label>Nome da empresa *<input id="sn"></label><label>Número (WhatsApp) *<input id="sp" inputmode="tel" placeholder="(81) 99999-0000"></label><label>Preço do site (R$) *<input id="sv" inputmode="decimal" placeholder="Ex.: 800"></label></div><label>Descrição<textarea id="sd" placeholder="O que a empresa faz, produtos, diferenciais, endereço…"></textarea></label><div class="fg"><label>Arquivos da empresa (opcional)<input id="sf" type="file" multiple></label><label>Fotos da empresa (opcional)<input id="sh" type="file" accept="image/*" multiple></label></div><p class="err" id="se"></p><button data-a="gen">Gerar prompt</button></div><div id="pr"></div>'};
+V.projects=function(){var P=S.projects;if(!P.length)return '<h1>Projetos</h1><div class="card"><p>Nenhum projeto ainda. Gere o primeiro prompt em CRIAR SITES.</p><a class="btn" href="#sites">CRIAR SITES</a></div>';
+return '<h1>Projetos</h1>'+P.map(function(p){var v=p.status=='Vendido',n=p.status=='Não vendido';return '<div class="card"><h3>'+E(p.name)+'</h3><p class="m">WhatsApp: '+E(p.phone)+' · Preço: '+brl(p.price)+'<br>Criado em '+new Date(p.created).toLocaleDateString('pt-BR')+(p.files.length+p.photos.length?' · '+(p.files.length+p.photos.length)+' arquivo(s)/foto(s)':'')+'</p><p><span class="tag'+(v?' v':n?' n':'')+'">'+(v?'Vendido por '+brl(p.soldValue):p.status)+'</span></p><div class="row"><button class="ok" data-a="sold" data-i="'+p.id+'">VENDI</button><button class="no" data-a="nsold" data-i="'+p.id+'">NÃO VENDI</button><button class="s" data-a="cpp" data-i="'+p.id+'">Copiar prompt</button><button class="s" data-a="del" data-i="'+p.id+'">Excluir</button></div></div>'}).join('')};
+
+/* ---------- ações ---------- */
+var byId=function(i){return S.projects.filter(function(p){return p.id==i})[0]};
+A.close=closeM;A.yes=function(){var f=pend;pend=null;closeM();if(f)f()};
+A.pm=function(){var u=$('#pu').value,n=$('#pn').value,c=$('#pc').value.trim(),er=$('#pe');if(!u||!n){er.textContent='Selecione o estado e o nicho.';return}er.textContent='';openUrl('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(n+' em '+(c?c+', ':'')+u+', Brasil'),'Abrir no Google Maps')};
+A.gen=function(){var o={name:$('#sn').value.trim(),phone:$('#sp').value.trim(),desc:$('#sd').value.trim(),files:[].map.call($('#sf').files,function(f){return f.name}),photos:[].map.call($('#sh').files,function(f){return f.name})},price=num($('#sv').value),er=[];
+if(!o.name)er.push('Informe o nome da empresa.');if(digits(o.phone).length<10||digits(o.phone).length>13)er.push('Informe um número válido com DDD.');if(price<0)er.push('Informe o preço do site.');
+$('#se').textContent=er.join(' ');if(er.length)return;
+var pr=mkPrompt(o),p=G.id&&byId(G.id);if(p){Object.assign(p,{name:o.name,phone:o.phone,price:price,desc:o.desc,files:o.files,photos:o.photos,prompt:pr})}else{p={id:uid(),name:o.name,phone:o.phone,price:price,desc:o.desc,files:o.files,photos:o.photos,prompt:pr,created:Date.now(),status:'Criado',soldAt:0,soldValue:0};S.projects.unshift(p);G.id=p.id}save();
+$('#pr').innerHTML='<div class="card"><h3>Prompt para criar o site</h3><textarea id="pt" readonly style="min-height:260px" onfocus="this.select()">'+E(pr)+'</textarea><div class="row" style="margin-top:10px"><button data-a="cp">COPIAR PROMPT</button><a class="btn s" href="#projects">Ver em Projetos</a><button class="s" data-a="nw">Novo site</button></div><p class="m">O preço fica só no seu controle de vendas e não vai no prompt. Fotos e arquivos escolhidos não são enviados por aqui: anexe-os na conversa ao colar o prompt.</p></div>';$('#pr').scrollIntoView({behavior:'smooth'})};
+A.cp=function(){copyText($('#pt').value)};A.cpp=function(b){copyText(byId(b.dataset.i).prompt)};A.nw=function(){route()};
+A.sold=function(b){var p=byId(b.dataset.i);modal('<h3>Registrar venda: '+E(p.name)+'</h3><label>Valor da venda (R$)<input id="sv2" inputmode="decimal" value="'+p.price+'"></label><p class="err" id="e2"></p><div class="row"><button class="ok" data-a="sv" data-i="'+p.id+'">Confirmar venda</button><button class="s" data-a="close">Cancelar</button></div>')};
+A.sv=function(b){var p=byId(b.dataset.i),v=num($('#sv2').value);if(v<0){$('#e2').textContent='Informe um valor válido.';return}p.status='Vendido';p.soldValue=v;p.soldAt=Date.now();save();closeM();route();toast('Venda registrada!')};
+A.nsold=function(b){var p=byId(b.dataset.i);p.status='Não vendido';p.soldValue=0;p.soldAt=0;save();route();toast('Marcado como não vendido.')};
+A.del=function(b){var p=byId(b.dataset.i);cfm('Excluir o projeto “'+E(p.name)+'”? Esta ação não pode ser desfeita.',function(){S.projects=S.projects.filter(function(x){return x.id!=p.id});save();route()})};
+
+/* ---------- conta ---------- */
+function users(){try{return JSON.parse(localStorage.getItem('lf2u')||'[]')}catch(e){return[]}}
+function sha(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(d){return Array.from(new Uint8Array(d)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')})}
+function authUI(m){AM=m||AM;var up=AM=='up';$('#au').className='au';$('#au').innerHTML='<div class="card"><div class="logo" style="font-size:22px">LeadForge AI</div><p class="m" style="margin-top:2px">Transforme oportunidades em negócios digitais.</p><div class="tabs"><button class="'+(up?'s':'')+'" data-a="am" data-i="in">Entrar</button><button class="'+(up?'':'s')+'" data-a="am" data-i="up">Criar conta</button></div>'+(up?'<label>Seu nome<input id="an" autocomplete="name"></label>':'')+'<label>E-mail<input id="ae" type="email" autocomplete="email"></label><label>Senha'+(up?' (mínimo 8 caracteres)':'')+'<input id="ap" type="password" autocomplete="'+(up?'new-password':'current-password')+'"></label><p class="err" id="ar"></p><button data-a="go" style="width:100%">'+(up?'Criar conta':'Entrar')+'</button><p class="m" style="font-size:13px;margin-top:14px">Login com Google, Apple ou GitHub exige um servidor de autenticação e ainda não está configurado. Esta conta é local e fica só neste navegador.</p></div>'}
+A.am=function(b){authUI(b.dataset.i)};
+A.go=function(){var up=AM=='up',e=$('#ae').value.trim().toLowerCase(),p=$('#ap').value,n=up?$('#an').value.trim():'',er=$('#ar');
+if(up&&!n){er.textContent='Informe seu nome.';return}
+if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){er.textContent='E-mail inválido.';return}
+if(!p){er.textContent='Informe a senha.';return}
+if(up&&p.length<8){er.textContent='A senha precisa ter ao menos 8 caracteres.';return}
+if(!window.crypto||!crypto.subtle){er.textContent='Este navegador não permite criar contas seguras aqui.';return}
+var U=users(),u=U.filter(function(x){return x.e==e})[0];
+if(up){if(u){er.textContent='Já existe uma conta com este e-mail. Use “Entrar”.';return}
+var salt=uid()+uid();sha(salt+p).then(function(h){U.push({e:e,n:n,s:salt,h:h});try{localStorage.setItem('lf2u',JSON.stringify(U))}catch(x){er.textContent='Armazenamento bloqueado neste navegador.';return}start(e,n)})}
+else{if(!u){er.textContent='E-mail ou senha incorretos.';return}sha(u.s+p).then(function(h){if(h!==u.h){er.textContent='E-mail ou senha incorretos.';return}start(e,u.n)})}};
+function start(e,n){try{localStorage.setItem('lf2s',e)}catch(x){}loadS('lf3:'+e);S.user.email=e;if(!S.user.name)S.user.name=n;save();$('#au').className='';$('#au').innerHTML='';route()}
+A.out=function(){try{localStorage.removeItem('lf2s')}catch(x){}KEY='';S=blank();closeM();authUI('in')};
+function boot(){var s=null;try{s=localStorage.getItem('lf2s')}catch(e){}var u=s&&users().filter(function(x){return x.e==s})[0];if(u)start(u.e,u.n);else authUI(users().length?'in':'up')}
+
+/* ---------- rotas e eventos ---------- */
+var NAV=[['dashboard','Dashboard'],['prospecting','Prospectar empresas'],['sites','CRIAR SITES'],['projects','Projetos']];
+function route(){var h=location.hash.slice(1);if(!V[h])h='dashboard';closeM();$('#nav').innerHTML=NAV.map(function(n){return '<a href="#'+n[0]+'"'+(n[0]==h?' class="on"':'')+'>'+n[1]+'</a>'}).join('');$('#main').innerHTML=V[h]();window.scrollTo(0,0)}
+document.addEventListener('click',function(e){var a=e.target.closest('[data-a]');if(a&&A[a.dataset.a])A[a.dataset.a](a,e)});
+document.addEventListener('keydown',function(e){if(e.key=='Enter'&&e.target.tagName=='INPUT'&&e.target.closest('#au'))A.go()});
+window.addEventListener('hashchange',function(){if(KEY)route()});boot();
+</script>
+</body>
+</html>
